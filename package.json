@@ -1,0 +1,17 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "private": true,
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "@expo/samples": "2.1.1",
+    "expo": "^23.0.0",
+    "lodash": "^4.17.4",
+    "react": "16.0.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-23.0.0.tar.gz",
+    "react-native-canvas": "^0.1.20",
+    "react-native-swipe-gestures": "^1.0.2",
+    "react-navigation": "^1.0.0-beta.19"
+  }
+}
