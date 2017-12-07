@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 import GestureRecognizer from 'react-native-swipe-gestures';
-import Canvas from 'react-native-canvas';
 
 import Cell from './cell';
 import Preview from './preview';
@@ -294,7 +293,7 @@ export default class Grid extends Component {
     for (let i = row; i >= 4; i--) {
       for (let k = 0; k < 10; k++) {
         const nextColor = this.checkColor(i - 1, k);
-        console.log('change color', i, k, this.checkColor(i, k), nextColor);
+        console.log('change color',i,k,this.checkColor(i, k),nextColor);
         if (nextColor) {
           this.changeColor(i, k, this.checkColor(i - 1, k));
         }
@@ -323,7 +322,7 @@ export default class Grid extends Component {
     });
 
     if (row_was_cleared) {
-      this.setState({ score: this.state.score + 1000 * num_rows_cleared ** 2 });
+      this.setState({ score: this.state.score + 1000 * num_rows_cleared**2 });
     }
   }
 
@@ -382,7 +381,7 @@ export default class Grid extends Component {
     }
 
     if (!can) {
-      for (let i = this.props.h + 3; i >= 0; i--) { //h is 20, so i want 20 rows
+      for (let i = this.props.h +3; i >= 0; i--) { //h is 20, so i want 20 rows
         for (let j = this.props.w - 1; j >= 0; j--) { // w is 10
           if (belongs(this.checkColor(i, j))) {
             this.changeColor(i, j, 'gray');
@@ -398,36 +397,42 @@ export default class Grid extends Component {
 
   }
 
-  updateCanvas(canvas) {
-    console.log('canvas',canvas)
-    const ctx = canvas.getContext('2d');
-
-    const size = 18;
-
-    this.state.grid.forEach((row, i) => {
-      if (i < 4) return;
-      row.forEach((cell, j) => {
-        let color = 'white';
-        if (cell == 1) {
-          color = 'blue';
-        } else if (cell == 2) {
-          color = 'green';
-        }
-
-        if (i < 4) {
-          color = 'red';
-        }
-        ctx.fillStyle = color;
-
-        ctx.fillRect(i * size, j * size, size, size)
-      })
-    })
-  }
-
   renderCells() {
     let size = 18;
 
-    return <Canvas ref={this.updateCanvas.bind(this)} />
+    // console.log('rendering grid');
+    return this.state.grid.map((row, i) => {
+      if (i < 4) {
+        return (
+          <View key={i} style={{ height: 0, flexDirection: 'row' }}>
+            {row.map((cell, j) => {
+              let color = 'white';
+              return <Cell ref={i + ',' + j} color={color} size={size} />
+            })}
+          </View>
+        )
+      }
+
+      return (
+        <View key={i} style={{ flexDirection: 'row' }}>
+          {row.map((cell, j) => {
+            // console.log('color is:', cell)
+            let color = 'white';
+            if (cell == 1) {
+              color = 'blue';
+            } else if (cell == 2) {
+              color = 'green';
+            }
+
+            if (i < 4) {
+              color = 'red';
+            }
+
+            return <Cell ref={i + ',' + j} borderWidth={1} color={color} size={size} />
+          })}
+        </View>
+      )
+    })
   }
 
 

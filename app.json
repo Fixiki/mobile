@@ -16,6 +16,11 @@
     },
     "android": {
       "package": "com.larinel.taetris"
+    },
+    "isDetached": true,
+    "detach": {
+      "scheme": "expadf9fda60f4b4533a3999143f20c1a04",
+      "androidExpoViewUrl": "https://s3.amazonaws.com/exp-exponent-view-code/android-v2.1.2-sdk23.0.0-d47f172b-1ed3-4c8f-9e48-239052c678b6.tar.gz"
     }
   }
 }
