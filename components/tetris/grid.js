@@ -12,8 +12,9 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 
 import Cell from './cell';
 import Preview from './preview';
-import { belongs, createRandomBlock } from './helpers';
+import { belongs, createRandomBlock, canPerformAction,allowAction } from './helpers';
 import { rotate } from './rotation';
+import InAppBilling from 'react-native-billing';
 
 export default class Grid extends Component {
   constructor(props) {
@@ -26,8 +27,12 @@ export default class Grid extends Component {
       numBlocks: 5,
       score: 0,
       started: false,
-      gameOver: true
-    }
+      gameOver: true,
+      modalOpened: true,
+      canPlay: false,
+      currentPayment: false,
+    };
+
 
     this.grid = [];
     this.currentBlock = 'J';
@@ -62,8 +67,9 @@ export default class Grid extends Component {
   }
 
   startGame() {
-    this.setState({ gameOver: false, started: true, score: 0 });
+    this.setState({ gameOver: false, started: true, score: 0, modalOpened: false });
     this.loadNextBlock();
+
     clearInterval(this.interval);
     this.interval = setInterval(() => {
       this.tick()
@@ -101,6 +107,10 @@ export default class Grid extends Component {
   }
 
   down() {
+    if(!canPerformAction('down')) {
+      this.setState({currentPayment:'down'});
+      return;
+    }
     clearInterval(this.interval);
     this.speed = 1;
     this.interval = setInterval(() => {
@@ -191,7 +201,10 @@ export default class Grid extends Component {
   }
 
   shiftCells(direction) {
-
+    if(!canPerformAction(`shift_${direction}`)) {
+      this.setState({currentPayment:`shift_${direction}`});
+      return;
+    }
     let points = [];
     for (let i = 4; i < 24; i++) { //h is 20, so i want 20 rows
       for (let j = 0; j < 10; j++) { // w is 10
@@ -293,7 +306,7 @@ export default class Grid extends Component {
     for (let i = row; i >= 4; i--) {
       for (let k = 0; k < 10; k++) {
         const nextColor = this.checkColor(i - 1, k);
-        console.log('change color',i,k,this.checkColor(i, k),nextColor);
+        console.log('change color', i, k, this.checkColor(i, k), nextColor);
         if (nextColor) {
           this.changeColor(i, k, this.checkColor(i - 1, k));
         }
@@ -322,7 +335,7 @@ export default class Grid extends Component {
     });
 
     if (row_was_cleared) {
-      this.setState({ score: this.state.score + 1000 * num_rows_cleared**2 });
+      this.setState({ score: this.state.score + 1000 * num_rows_cleared ** 2 });
     }
   }
 
@@ -350,11 +363,11 @@ export default class Grid extends Component {
   }
 
   tick() {
-
     let points = [];
-    const { grid, w, h } = this.state;
-    for (let i = this.props.h + 3; i >= 0; i--) { //h is 20, so i want 20 rows
-      for (let j = this.props.w - 1; j >= 0; j--) { // w is 10
+    const { grid, w, h, currentPayment } = this.state;
+    if (currentPayment) return;
+    for (let i = this.props.h + 3; i >= 0; i--) {
+      for (let j = this.props.w - 1; j >= 0; j--) {
         if (belongs(this.checkColor(i, j))) {
           points.push({ i, j });
         }
@@ -368,8 +381,8 @@ export default class Grid extends Component {
 
     if (!can && this.grid[3].includes(1)) {
       clearInterval(this.interval);
-      for (let i = this.props.h + 3; i >= 0; i--) { //h is 20, so i want 20 rows
-        for (let j = this.props.w - 1; j >= 0; j--) { // w is 10
+      for (let i = this.props.h + 3; i >= 0; i--) {
+        for (let j = this.props.w - 1; j >= 0; j--) {
           if (belongs(this.checkColor(i, j))) {
             this.changeColor(i, j, 'gray');
           }
@@ -381,8 +394,8 @@ export default class Grid extends Component {
     }
 
     if (!can) {
-      for (let i = this.props.h +3; i >= 0; i--) { //h is 20, so i want 20 rows
-        for (let j = this.props.w - 1; j >= 0; j--) { // w is 10
+      for (let i = this.props.h + 3; i >= 0; i--) {
+        for (let j = this.props.w - 1; j >= 0; j--) {
           if (belongs(this.checkColor(i, j))) {
             this.changeColor(i, j, 'gray');
           }
@@ -435,7 +448,6 @@ export default class Grid extends Component {
     })
   }
 
-
   renderButtons() {
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
@@ -457,12 +469,91 @@ export default class Grid extends Component {
 
   }
 
-  renderStart() {
+  async payment(callback) {
+    try {
+      console.log('Opening');
+      await InAppBilling.open();
+      console.log('Purchasing');
+      const data = await InAppBilling.purchase('android.test.purchased');
+      console.log(data);
+    } catch (e) {
+      console.log(e.message);
+      await InAppBilling.close()
+    } finally {
+      console.log('Closing');
+      await InAppBilling.close()
+    }
+    this.setState({ currentPayment: false }, callback.bind(this));
+  }
+
+  renderPaymentModal(type) {
+    let text = false;
+    let callback = false;
+    switch (type) {
+      case 'start': {
+        text = 'начать игру'
+        callback = () => {
+          this.setState({ canPlay: true }, this.startGame)
+        };
+        break;
+      }
+      case 'shift_left': {
+        text = 'двигаться влево';
+        callback = () => {
+          allowAction('shift_left');
+          this.shiftCells('left');
+        };
+        break;
+      }
+      case 'down': {
+        text = 'ускорять блоки';
+        callback = () => {
+          allowAction('down');
+          this.down();
+        };
+        break;
+      }
+      default:
+        return null
+    }
     return (
       <Modal
         animationType={'slide'}
         transparent={true}
-        visible={this.state.gameOver}
+        visible={true}
+        style={{ flex: 1 }}
+        onRequestClose={() => {
+        }}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,.5)' }}>
+          <Text style={{ fontSize: 24, fontWeight: '800' }}>
+            Вам нужно оплатить возможность {text}
+          </Text>
+
+          <TouchableOpacity onPress={() => {
+            this.payment(callback)
+          }}>
+            <Text style={{ fontSize: 32, color: 'white', fontWeight: '500' }}>
+              Оплатить
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  }
+
+  renderModal() {
+    if (!this.state.canPlay) return this.renderPaymentModal('start');
+    if (this.state.gameOver) return this.renderStartModal();
+    if (this.state.currentPayment) return this.renderPaymentModal(this.state.currentPayment);
+  }
+
+  renderStartModal() {
+    return (
+      <Modal
+        animationType={'slide'}
+        transparent={true}
+        visible={true}
         style={{ flex: 1 }}
         onRequestClose={() => {
         }}
@@ -513,7 +604,7 @@ export default class Grid extends Component {
         </View>
         {this.renderButtons()}
 
-        {this.renderStart()}
+        {this.renderModal()}
 
       </GestureRecognizer>
     )

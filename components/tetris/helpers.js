@@ -19,6 +19,12 @@ const colors = [
   { type: 'skyblue', available: false, price: 1 },
 ];
 
+const actions = {
+  shift_right: { available: true },
+  shift_left: { available: false },
+  down: { available: false },
+};
+
 export function createRandomBlock() {
 
   return {
@@ -30,6 +36,15 @@ export function createRandomBlock() {
 
 export function belongs(color) {
   return colors.some(x => x.type === color);
+}
+
+export function canPerformAction(name) {
+  return !!actions[name] && actions[name].available
+}
+
+export function allowAction(name) {
+  if(!actions[name]) return;
+  actions[name].available = true;
 }
 
 
