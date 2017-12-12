@@ -5,7 +5,7 @@ import {
   StyleSheet
 } from 'react-native';
 
-import Grid from '../components/tetris/grid';
+import Grid from './components/tetris/grid';
 
 export default class Main extends Component {
   render() {

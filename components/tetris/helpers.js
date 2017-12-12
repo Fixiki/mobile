@@ -47,4 +47,20 @@ export function allowAction(name) {
   actions[name].available = true;
 }
 
+export function allowBlock(type) {
+  const block = blocks.find(x => x.type === type);
+  if(!block) return false;
+  block.available = true;
+}
+
+export function allowColor(name) {
+  const color = colors.find(x => x.type === type);
+  if(!color) return false;
+  color.available = true;
+}
+
+export function getBlocks() {
+  return blocks;
+}
+
 

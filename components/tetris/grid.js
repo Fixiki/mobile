@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {
   View,
+  ScrollView,
+  Button,
   StyleSheet,
   Image,
   Text,
@@ -12,7 +14,14 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 
 import Cell from './cell';
 import Preview from './preview';
-import { belongs, createRandomBlock, canPerformAction,allowAction } from './helpers';
+import {
+  belongs,
+  createRandomBlock,
+  canPerformAction,
+  allowAction,
+  getBlocks,
+  allowBlock
+} from './helpers';
 import { rotate } from './rotation';
 import InAppBilling from 'react-native-billing';
 
@@ -28,7 +37,7 @@ export default class Grid extends Component {
       score: 0,
       started: false,
       gameOver: true,
-      modalOpened: true,
+      menu: false,
       canPlay: false,
       currentPayment: false,
     };
@@ -67,7 +76,7 @@ export default class Grid extends Component {
   }
 
   startGame() {
-    this.setState({ gameOver: false, started: true, score: 0, modalOpened: false });
+    this.setState({ gameOver: false, started: true, score: 0, menu: false });
     this.loadNextBlock();
 
     clearInterval(this.interval);
@@ -101,14 +110,13 @@ export default class Grid extends Component {
 
   changeColor(i, j, color) {
     let id = i + ',' + j;
-    let bin = color == 'white' ? 0 : 1;
-    this.grid[i][j] = bin;
+    this.grid[i][j] = color == 'white' ? 0 : 1;
     this.refs[id].changeColor(color);
   }
 
   down() {
-    if(!canPerformAction('down')) {
-      this.setState({currentPayment:'down'});
+    if (!canPerformAction('down')) {
+      this.setState({ currentPayment: 'down' });
       return;
     }
     clearInterval(this.interval);
@@ -201,8 +209,8 @@ export default class Grid extends Component {
   }
 
   shiftCells(direction) {
-    if(!canPerformAction(`shift_${direction}`)) {
-      this.setState({currentPayment:`shift_${direction}`});
+    if (!canPerformAction(`shift_${direction}`)) {
+      this.setState({ currentPayment: `shift_${direction}` });
       return;
     }
     let points = [];
@@ -364,8 +372,8 @@ export default class Grid extends Component {
 
   tick() {
     let points = [];
-    const { grid, w, h, currentPayment } = this.state;
-    if (currentPayment) return;
+    const { grid, w, h, currentPayment, menu } = this.state;
+    if (currentPayment || menu) return;
     for (let i = this.props.h + 3; i >= 0; i--) {
       for (let j = this.props.w - 1; j >= 0; j--) {
         if (belongs(this.checkColor(i, j))) {
@@ -543,6 +551,9 @@ export default class Grid extends Component {
   }
 
   renderModal() {
+
+    if (this.state.menu) return this.renderMenu(this.state.menu);
+
     if (!this.state.canPlay) return this.renderPaymentModal('start');
     if (this.state.gameOver) return this.renderStartModal();
     if (this.state.currentPayment) return this.renderPaymentModal(this.state.currentPayment);
@@ -579,6 +590,37 @@ export default class Grid extends Component {
     )
   }
 
+  renderMenu() {
+    return <Modal
+      animationType={'slide'}
+      visible={true}
+      style={{ flex: 1 }}
+      onRequestClose={() => {
+        this.setState({ menu: false })
+      }}
+    >
+      <View
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,.5)' }}>
+        <Text>Вы можете приобрести доступ к блокам</Text>
+        <View>
+          {getBlocks().map(block => (
+            <View>
+              <Text>Блок типа {block.type}</Text>
+              {block.available || <Button onPress={() => {
+                this.payment(() => {
+                  allowBlock(block.type)
+                })
+              }} title="Купить" />}
+            </View>
+          ))}
+        </View>
+        <Button title="Готово" onPress={() => {
+          this.setState({ menu: false })
+        }} />
+      </View>
+    </Modal>
+  }
+
   render() {
     return (
       <GestureRecognizer
@@ -594,10 +636,13 @@ export default class Grid extends Component {
           <Text style={{ paddingTop: 10, fontSize: 16 }}>Score: {this.state.score}</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-          <View style={{ backgroundColor: 'white' }}>
+          <View style={{ backgroundColor: 'white', borderWidth: 1, borderColor: 'black' }}>
             {this.renderCells()}
           </View>
           <View style={{ marginLeft: 20, alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => this.setState({ menu: true })}>
+              <Text style={{ fontSize: 16, fontWeight: '800' }}>Menu</Text>
+            </TouchableOpacity>
             <Text style={{ fontSize: 16, fontWeight: '600' }}>NEXT</Text>
             <Preview blocks={this.state.blocks} />
           </View>
