@@ -1,11 +1,11 @@
 [Вики по ссылке](https://github.com/Fixiki/mobile/wiki)
 
 # Нормальные версии отчетов
- * [1]()
- * [2]()
- * [3](https://docs.google.com/document/d/1fCcaShrBfvCsEsp-oFl5EkeDQx9loIR1moCDU7obW38/edit)
+ * [1](https://docs.google.com/document/d/1uECiJqvFaC_NszIlLzt5CPj1EcLQyOR7X_fFeuUriYk/edit?usp=sharing)
+ * [2](https://docs.google.com/document/d/1uECiJqvFaC_NszIlLzt5CPj1EcLQyOR7X_fFeuUriYk/edit?usp=sharing)
+ * [3](https://docs.google.com/document/d/1O0aKoGAoXiHd2iyor2KjYwB35fOvV9QFoio0VwdlDGU/edit?usp=sharing)
  * [4](https://docs.google.com/document/d/1fCcaShrBfvCsEsp-oFl5EkeDQx9loIR1moCDU7obW38/edit?usp=sharing)
- * [5]()
+ * [5](https://docs.google.com/document/d/1t9IQXl-Ur1ZMX32xPWyAfFkYmYOC-CKpeJ3kjEuXkuk/edit?usp=sharing)
  * [6]()
  * [7]()
  * [8]()
