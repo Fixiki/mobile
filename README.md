@@ -1,5 +1,15 @@
 [Вики по ссылке](https://github.com/Fixiki/mobile/wiki)
 
+# Нормальные версии отчетов
+ * [1]()
+ * [2]()
+ * [3](https://docs.google.com/document/d/1fCcaShrBfvCsEsp-oFl5EkeDQx9loIR1moCDU7obW38/edit)
+ * [4](https://docs.google.com/document/d/1fCcaShrBfvCsEsp-oFl5EkeDQx9loIR1moCDU7obW38/edit?usp=sharing)
+ * [5]()
+ * [6]()
+ * [7]()
+ * [8]()
+
 Революционный винтажный крафтовый инди независимый game as service биткоин-френдли римейк праотца компьютерных игр 
 
 # Авторьі:
